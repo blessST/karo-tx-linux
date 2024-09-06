@@ -54,6 +54,8 @@ struct smsc_phy_priv {
 	unsigned int edpd_mode_set_by_user:1;
 	unsigned int edpd_max_wait_ms;
 	bool wol_arp;
+	u16 intmask;
+	bool wakeup_enable;
 };
 
 static int smsc_phy_ack_interrupt(struct phy_device *phydev)
@@ -65,6 +67,7 @@ static int smsc_phy_ack_interrupt(struct phy_device *phydev)
 
 int smsc_phy_config_intr(struct phy_device *phydev)
 {
+	struct smsc_phy_priv *priv = phydev->priv;
 	int rc;
 
 	if (phydev->interrupts == PHY_INTERRUPT_ENABLED) {
@@ -72,8 +75,10 @@ int smsc_phy_config_intr(struct phy_device *phydev)
 		if (rc)
 			return rc;
 
-		rc = phy_write(phydev, MII_LAN83C185_IM,
-			       MII_LAN83C185_ISF_INT_PHYLIB_EVENTS);
+		priv->intmask = MII_LAN83C185_ISF_INT_PHYLIB_EVENTS;
+		if (priv->wakeup_enable)
+			priv->intmask |= MII_LAN83C185_ISF_INT8;
+		rc = phy_write(phydev, MII_LAN83C185_IM, priv->intmask);
 	} else {
 		rc = phy_write(phydev, MII_LAN83C185_IM, 0);
 		if (rc)
