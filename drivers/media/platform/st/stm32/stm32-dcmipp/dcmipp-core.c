@@ -78,7 +78,6 @@ static const struct dcmipp_pipeline_config stm32mp13_pipe_cfg = {
 	.links		= stm32mp13_ent_links,
 	.num_links	= ARRAY_SIZE(stm32mp13_ent_links),
 	.hw_revision	= DCMIPP_STM32MP13_VERR,
-	.pipe_nb	= 1
 };
 
 static const struct dcmipp_ent_config stm32mp25_ent_config[] = {
@@ -258,7 +257,7 @@ static int dcmipp_create_subdevs(struct dcmipp_device *dcmipp)
 
 err_init_entity:
 	while (i-- > 0)
-		dcmipp->pipe_cfg->ents[i - 1].release(dcmipp->entity[i - 1]);
+		dcmipp->pipe_cfg->ents[i].release(dcmipp->entity[i]);
 	return ret;
 }
 
@@ -266,7 +265,7 @@ static const struct of_device_id dcmipp_of_match[] = {
 	{ .compatible = "st,stm32mp13-dcmipp", .data = &stm32mp13_pipe_cfg },
 	{ .compatible = "st,stm32mp21-dcmipp", .data = &stm32mp21_pipe_cfg },
 	{ .compatible = "st,stm32mp25-dcmipp", .data = &stm32mp25_pipe_cfg },
-	{ /* end node */ },
+	{ /* end node */ }
 };
 MODULE_DEVICE_TABLE(of, dcmipp_of_match);
 
