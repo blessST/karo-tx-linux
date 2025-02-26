@@ -180,6 +180,44 @@ static int smsc_phy_reset(struct phy_device *phydev)
 	return genphy_soft_reset(phydev);
 }
 
+static int smsc_phy_suspend(struct phy_device *phydev)
+{
+	struct device *dev = &phydev->mdio.dev;
+
+	if (phydev->suspended)
+		return 0;
+
+	/* do not power down PHY when PHY enable power/wakeup */
+	if (device_may_wakeup(dev))
+		return 0;
+
+	if (phy_interrupt_is_valid(phydev)) {
+		phydev->interrupts = PHY_INTERRUPT_DISABLED;
+		if (phydev->drv->config_intr)
+			phydev->drv->config_intr(phydev);
+	}
+
+	return genphy_suspend(phydev);
+}
+
+static int smsc_phy_resume(struct phy_device *phydev)
+{
+	genphy_resume(phydev);
+
+	if (!phydev->suspended)
+		return 0;
+
+	usleep_range(25000, 26000);
+
+	if (phy_interrupt_is_valid(phydev)) {
+		phydev->interrupts = PHY_INTERRUPT_ENABLED;
+		if (phydev->drv->config_intr)
+			phydev->drv->config_intr(phydev);
+	}
+
+	return 0;
+}
+
 static int lan87xx_config_aneg(struct phy_device *phydev)
 {
 	int rc;
@@ -730,8 +768,8 @@ static struct phy_driver smsc_phy_driver[] = {
 	.get_strings	= smsc_get_strings,
 	.get_stats	= smsc_get_stats,
 
-	.suspend	= genphy_suspend,
-	.resume		= genphy_resume,
+	.suspend	= smsc_phy_suspend,
+	.resume		= smsc_phy_resume,
 }, {
 	/* This covers internal PHY (phy_id: 0x0007C0C3) for
 	 * LAN9500 (PID: 0x9500), LAN9514 (PID: 0xec00), LAN9505 (PID: 0x9505)
@@ -880,7 +918,7 @@ static struct phy_driver smsc_phy_driver[] = {
 	.set_wol	= lan874x_set_wol,
 	.get_wol	= lan874x_get_wol,
 
-	.suspend	= genphy_suspend,
+	.suspend	= smsc_phy_suspend,
 	.resume		= smsc_phy_resume,
 } };
 
