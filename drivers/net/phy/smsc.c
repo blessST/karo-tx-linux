@@ -77,7 +77,7 @@ int smsc_phy_config_intr(struct phy_device *phydev)
 
 		priv->intmask = MII_LAN83C185_ISF_INT_PHYLIB_EVENTS;
 		if (priv->wakeup_enable)
-			priv->intmask |= MII_LAN83C185_ISF_INT8;
+			priv->intmask |= MII_LAN874X_ISF_INT8;
 		rc = phy_write(phydev, MII_LAN83C185_IM, priv->intmask);
 	} else {
 		rc = phy_write(phydev, MII_LAN83C185_IM, 0);
@@ -562,7 +562,7 @@ static int lan874x_set_wol(struct phy_device *phydev,
 	return 0;
 }
 
-static int smsc_phy_resume(struct phy_device *phydev)
+static int lan874x_phy_resume(struct phy_device *phydev)
 {
 	int rc;
 
@@ -945,7 +945,7 @@ static struct phy_driver smsc_phy_driver[] = {
 	.get_wol	= lan874x_get_wol,
 
 	.suspend	= smsc_phy_suspend,
-	.resume		= smsc_phy_resume,
+	.resume		= lan874x_phy_resume,
 } };
 
 module_phy_driver(smsc_phy_driver);
