@@ -1425,8 +1425,10 @@ void dwc2_drd_exit(struct dwc2_hsotg *hsotg);
 void dwc2_dump_dev_registers(struct dwc2_hsotg *hsotg);
 void dwc2_dump_host_registers(struct dwc2_hsotg *hsotg);
 void dwc2_dump_global_registers(struct dwc2_hsotg *hsotg);
+#if IS_ENABLED(CONFIG_POWER_SUPPLY)
 int stm32mp2_usb2phy_batt_chg_det(struct dwc2_hsotg *hsotg);
 int stm32mp2_usb2phy_usb_chg_psy_register(struct dwc2_hsotg *hsotg);
+#endif /* IS_ENABLED(CONFIG_POWER_SUPPLY) */
 
 #define DWC2_POWER_DOWN_RESUME		0
 #define DWC2_POWER_DOWN_REMOTE_WKUP	1

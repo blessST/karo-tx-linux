@@ -4915,9 +4915,11 @@ static int dwc2_hsotg_pullup(struct usb_gadget *gadget, int is_on)
 	spin_unlock_irqrestore(&hsotg->lock, flags);
 
 	if (hsotg->params.stm32_has_batt_chg_det && is_on) {
+#if IS_ENABLED(CONFIG_POWER_SUPPLY)
 		ret = stm32mp2_usb2phy_batt_chg_det(hsotg);
 		if (ret)
 			dev_dbg(hsotg->dev, "%s: battery detection failed\n", __func__);
+#endif
 	}
 
 	spin_lock_irqsave(&hsotg->lock, flags);

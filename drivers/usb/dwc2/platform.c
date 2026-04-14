@@ -34,6 +34,7 @@ static const char dwc2_driver_name[] = "dwc2";
 #define VBUS_CURRENT_1500MA	1500
 #define VBUS_CURRENT_MAX	1500
 
+#if IS_ENABLED(CONFIG_POWER_SUPPLY)
 static enum power_supply_property usb_chg_props[] = {
 	POWER_SUPPLY_PROP_ONLINE,
 	POWER_SUPPLY_PROP_CURRENT_NOW,
@@ -209,6 +210,7 @@ int stm32mp2_usb2phy_batt_chg_det(struct dwc2_hsotg *hsotg)
 
 	return 0;
 }
+#endif /* IS_ENABLED(CONFIG_POWER_SUPPLY) */
 
 /*
  * Check the dr_mode against the module configuration and hardware
@@ -828,9 +830,11 @@ static int dwc2_driver_probe(struct platform_device *dev)
 	}
 
 	if (hsotg->params.stm32_has_batt_chg_det && hsotg->dr_mode != USB_DR_MODE_HOST) {
+#if IS_ENABLED(CONFIG_POWER_SUPPLY)
 		retval = stm32mp2_usb2phy_usb_chg_psy_register(hsotg);
 		if (retval)
 			goto error_drd;
+#endif
 	}
 
 	/*
