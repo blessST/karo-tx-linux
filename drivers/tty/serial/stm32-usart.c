@@ -2205,7 +2205,12 @@ static int stm32_usart_serial_probe(struct platform_device *pdev)
 	pm_runtime_set_autosuspend_delay(&pdev->dev, STM32_USART_AUTOSUSPEND_DELAY_MS);
 	pm_runtime_enable(&pdev->dev);
 
-	clk_disable_unprepare(stm32port->clk);
+	/*
+	 * Keep the clock enabled after probe. The runtime_resume/suspend
+	 * callbacks only manage wakeup configuration, not the clock, so
+	 * disabling the clock here leaves the device in an inconsistent state
+	 * (PM-active but clock off) causing console writes to hang on TXE.
+	 */
 
 	return 0;
 
