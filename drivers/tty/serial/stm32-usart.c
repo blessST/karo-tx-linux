@@ -2206,11 +2206,17 @@ static int stm32_usart_serial_probe(struct platform_device *pdev)
 	pm_runtime_enable(&pdev->dev);
 
 	/*
-	 * Keep the clock enabled after probe. The runtime_resume/suspend
-	 * callbacks only manage wakeup configuration, not the clock, so
-	 * disabling the clock here leaves the device in an inconsistent state
-	 * (PM-active but clock off) causing console writes to hang on TXE.
+	 * For the console UART, keep the clock enabled after probe.
+	 * runtime_resume/suspend only manage wakeup configuration, not the
+	 * clock, so disabling the clock here leaves the device in an
+	 * inconsistent state (PM-active but clock off), causing console writes
+	 * to spin forever on USART_SR_TXE and blocking all kernel output.
+	 *
+	 * For non-console UARTs, disable the clock as originally intended to
+	 * save power; the clock will be re-enabled on open via pm_runtime.
 	 */
+	if (!uart_console(&stm32port->port))
+		clk_disable_unprepare(stm32port->clk);
 
 	return 0;
 
