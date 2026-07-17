@@ -4769,7 +4769,9 @@ static int dwc2_hsotg_udc_stop(struct usb_gadget *gadget)
 	device_set_wakeup_capable(&gadget->dev, false);
 
 	/* Exit clock gating when driver is stopped. */
+	spin_lock_irqsave(&hsotg->lock, flags);
 	dwc2_gadget_exit_lp(hsotg);
+	spin_unlock_irqrestore(&hsotg->lock, flags);
 
 	/* all endpoints should be shutdown */
 	for (ep = 1; ep < hsotg->num_of_eps; ep++) {
